@@ -2,9 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   
-  // Image optimization
   images: {
-    domains: ['maps.googleapis.com'],
     remotePatterns: [
       {
         protocol: 'https',

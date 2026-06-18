@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+
+enum JobStatus {
+  PENDING
+  QUOTE_SENT
+  ACCEPTED
+  DRIVER_ASSIGNED
+  DRIVER_ARRIVING
+  IN_TRANSIT
+  PICKED_UP
+  DELIVERED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum VehicleType {
+  BIKE
+  VAN
+  TRUCK
+  HAULAGE
+}
+
+enum NotificationType {
+  JOB_CREATED
+  JOB_ACCEPTED
+  DRIVER_ASSIGNED
+  DRIVER_ARRIVING
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  PRICE_UPDATE
+}
+
+model User {
+  id            String              @id @default(cuid())
+  phone         String              @unique
+  name          String?
+  email         String?             @unique
+  role          Role                @default(CUSTOMER)
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  customerJobs  Job[]               @relation("CustomerJobs")
+  providerJobs  Job[]               @relation("ProviderJobs")
+  notifications NotificationEvent[]
+  otps          Otp[]
+
+  @@index([phone])
+  @@index([role])
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+
+  @@index([phone, code])
+  @@index([expiresAt])
+}
+
+model Job {
+  id               String              @id @default(cuid())
+  status           JobStatus           @default(PENDING)
+  vehicleType      VehicleType
+  pickupAddress    String
+  pickupLat        Float
+  pickupLng        Float
+  dropoffAddress   String
+  dropoffLat       Float
+  dropoffLng       Float
+  distance         Float
+  basePrice        Float
+  distancePrice    Float
+  surgeMultiplier  Float               @default(1.0)
+  surgePrice       Float               @default(0)
+  totalPrice       Float
+  estimatedTime    Int
+  packageDetails   String?
+  notes            String?
+  pickupTime       DateTime?
+  dropoffTime      DateTime?
+  deliveredAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  customer         User                @relation("CustomerJobs", fields: [customerId], references: [id], onDelete: Cascade)
+  customerId       String
+  provider         User?               @relation("ProviderJobs", fields: [providerId], references: [id])
+  providerId       String?
+  notifications    NotificationEvent[]
+  locationHistory  LocationHistory[]
+
+  @@index([customerId])
+  @@index([providerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model LocationHistory {
+  id        String   @id @default(cuid())
+  lat       Float
+  lng       Float
+  timestamp DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     String
+
+  @@index([jobId])
+}
+
+model NotificationEvent {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  job       Job?             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     String?
+
+  @@index([userId])
+  @@index([jobId])
+  @@index([read])
+}
