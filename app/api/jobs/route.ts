@@ -33,7 +33,11 @@ export async function GET(request: NextRequest) {
     if (session.role === "CUSTOMER") {
       where.customerId = session.id;
     } else if (session.role === "PROVIDER") {
-      where.providerId = session.id;
+      if (status === "PENDING") {
+        where.providerId = null;
+      } else {
+        where.providerId = session.id;
+      }
     }
 
     if (status) {

@@ -64,13 +64,14 @@ export default function PostJobPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const fetchQuote = async () => {
+  const fetchQuote = async (vehicleOverride?: VehicleType) => {
+    const vehicle = vehicleOverride || form.vehicleType;
     if (
       !form.pickupLat ||
       !form.pickupLng ||
       !form.dropoffLat ||
       !form.dropoffLng ||
-      !form.vehicleType
+      !vehicle
     ) {
       return;
     }
@@ -89,7 +90,7 @@ export default function PostJobPage() {
             lat: parseFloat(form.dropoffLat),
             lng: parseFloat(form.dropoffLng),
           },
-          vehicleType: form.vehicleType,
+          vehicleType: vehicle,
         }),
       });
 
@@ -299,7 +300,7 @@ export default function PostJobPage() {
                   }`}
                   onClick={() => {
                     updateForm("vehicleType", v.type);
-                    setTimeout(fetchQuote, 0);
+                    fetchQuote(v.type);
                   }}
                 >
                   <div className="mb-2 text-2xl">{v.icon}</div>

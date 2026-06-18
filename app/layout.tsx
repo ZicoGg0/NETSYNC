@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Toaster } from "react-hot-toast";
+import ToasterProvider from "@/components/ToasterProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -47,13 +47,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="min-h-screen font-sans">
         {children}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            className: "!bg-surface-800 !text-white !border !border-surface-700",
-            duration: 4000,
-          }}
-        />
+        <ToasterProvider />
       </body>
     </html>
   );
