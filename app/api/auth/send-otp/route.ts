@@ -63,13 +63,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const responseData: Record<string, string> = {
-      message: "OTP sent successfully",
+    const responseData: Record<string, string | boolean> = {
+      message: result.fallback
+        ? "SMS not available — your OTP code is shown below"
+        : "OTP sent successfully",
       phone: maskPhone(normalized),
     };
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === "development" || result.fallback) {
       responseData.devOtp = result.code;
+      responseData.fallback = true;
     }
 
     return createSuccessResponse(responseData);

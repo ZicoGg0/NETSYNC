@@ -40,7 +40,11 @@ export default function ProviderLoginPage() {
         setDevOtp(data.data.devOtp);
       }
 
-      toast.success("OTP sent to your phone!");
+      toast.success(
+        data.data?.fallback
+          ? "OTP code shown below (SMS not available)"
+          : "OTP sent to your phone!"
+      );
       setStep("otp");
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch {
@@ -133,7 +137,7 @@ export default function ProviderLoginPage() {
 
           {devOtp && (
             <div className="mb-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-400">
-              Dev mode OTP: <strong>{devOtp}</strong>
+              Your OTP code: <strong>{devOtp}</strong>
             </div>
           )}
 
